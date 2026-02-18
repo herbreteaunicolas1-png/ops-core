@@ -1,0 +1,46 @@
+﻿{
+  "wedge": "cashflow",
+  "pack": "cash_collector",
+  "version": "1.0.0",
+  "timezone": "Europe/Paris",
+  "send_window": {
+    "days": ["mon", "tue", "wed", "thu", "fri"],
+    "start": "09:00",
+    "end": "18:00"
+  },
+  "safe_mode": {
+    "approval_first": true,
+    "no_auto_send": true
+  },
+  "sequence": [
+    { "day_offset": 0, "action": "email_soft" },
+    { "day_offset": 7, "action": "email_firm" },
+    { "day_offset": 14, "action": "email_final", "requires_approval": true }
+  ],
+  "dispute_policy": {
+    "on_dispute": "stop_all_auto",
+    "create_task": true,
+    "requires_approval": true
+  },
+  "ai": {
+    "extract_invoice": true,
+    "classify_reply": true,
+    "draft_email": true,
+    "anomaly": true
+  },
+  "templates": {
+    "email_soft": "packs/cash_collector/templates/email_soft_fr.md",
+    "email_firm": "packs/cash_collector/templates/email_firm_fr.md",
+    "email_final": "packs/cash_collector/templates/email_final_fr.md",
+    "approval_email": "packs/cash_collector/templates/approval_email_fr.md"
+  },
+  "idempotency": {
+    "format": "<pack>|<entity_type>|<entity_id>|<action>|<window>",
+    "window": "YYYY-MM-DD"
+  },
+  "approvals": {
+    "channel": "email",
+    "expiry_hours": 24,
+    "link_signature": "hmac_sha256"
+  }
+}
