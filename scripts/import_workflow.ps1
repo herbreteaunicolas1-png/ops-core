@@ -1,23 +1,20 @@
 ﻿param(
-  [Parameter(Mandatory=$true)][string]$ApiKey,
-  [string]$BaseUrl = "http://localhost:5678",
-  [string]$WorkflowFile = ".\workflows\imports\workflow_import_test_http.json"
+  [Parameter(Mandatory=$true)]
+  [string]$File
 )
 
-if (-not (Test-Path $WorkflowFile)) {
-  Write-Error "Fichier introuvable: $WorkflowFile"
-  exit 1
+$Base = $env:N8N_BASE
+$ApiKey = $env:N8N_API_KEY
+
+if ([string]::IsNullOrWhiteSpace($Base)) { throw "ENV N8N_BASE manquant. Ex: `$env:N8N_BASE='http://localhost:5678'" }
+if ([string]::IsNullOrWhiteSpace($ApiKey)) { throw "ENV N8N_API_KEY manquant. Ex: `$env:N8N_API_KEY='xxxx'" }
+if (!(Test-Path $File)) { throw "Fichier introuvable: $File" }
+
+$headers = @{
+  "X-N8N-API-KEY" = $ApiKey
+  "Content-Type" = "application/json"
 }
 
-# IMPORTANT: en PowerShell, utiliser curl.exe (pas l’alias curl)
-$cmd = @(
-  "curl.exe",
-  "-sS",
-  "-X", "POST", "$BaseUrl/rest/workflows",
-  "-H", "X-N8N-API-KEY: $ApiKey",
-  "-H", "Content-Type: application/json",
-  "--data-binary", "@$WorkflowFile"
-)
-
-Write-Host "Import workflow -> $BaseUrl/rest/workflows"
-& $cmd
+# lecture raw + import
+$body = Get-Content -Raw -Path $File
+Invoke-RestMethod -Method Post -Uri "$Base/api/v1/workflows" -Headers $headers -Body $body
